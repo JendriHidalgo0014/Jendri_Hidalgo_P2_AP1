@@ -5,7 +5,15 @@ using Jendri_Hidalgo_P2_AP1.Models;
 namespace Jendri_Hidalgo_P2_AP1.DAL
 {
 	public class Context : DbContext
-	{
+	{	
+		public Context(DbContextOptions<Context> options) : base(options) { }
+
+		public DbSet<Ciudades> Ciudades { get; set; }
+
+		public DbSet<Encuesta> Encuesta { get; set; }
+
+		public DbSet<CiudadesDetalle> CiudadesDetalle { get; set; }
+
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -19,6 +27,10 @@ namespace Jendri_Hidalgo_P2_AP1.DAL
 		}
 
 	}
-
-
 }
+
+
+
+
+
+
