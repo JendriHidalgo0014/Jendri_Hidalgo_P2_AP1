@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Jendri_Hidalgo_P2_AP1.Models
 {
@@ -14,7 +15,11 @@ namespace Jendri_Hidalgo_P2_AP1.Models
 		public decimal Monto { get; set; }
 
 
+		[ForeignKey("CiudadId")]
+		public ICollection<CiudadesDetalle> CiudadesDetalle { get; set; } = new List<CiudadesDetalle>();
+
 	}
 }
+
 
 
