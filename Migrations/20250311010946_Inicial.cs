@@ -45,8 +45,10 @@ namespace Jendri_Hidalgo_P2_AP1.Migrations
                 {
                     DetalleId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    EncuestaId = table.Column<int>(type: "int", nullable: false),
                     CiudadId = table.Column<int>(type: "int", nullable: false),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Monto = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -57,12 +59,23 @@ namespace Jendri_Hidalgo_P2_AP1.Migrations
                         principalTable: "Ciudades",
                         principalColumn: "CiudadId",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CiudadesDetalle_Encuesta_EncuestaId",
+                        column: x => x.EncuestaId,
+                        principalTable: "Encuesta",
+                        principalColumn: "EncuestaId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_CiudadesDetalle_CiudadId",
                 table: "CiudadesDetalle",
                 column: "CiudadId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CiudadesDetalle_EncuestaId",
+                table: "CiudadesDetalle",
+                column: "EncuestaId");
         }
 
         /// <inheritdoc />
@@ -72,10 +85,10 @@ namespace Jendri_Hidalgo_P2_AP1.Migrations
                 name: "CiudadesDetalle");
 
             migrationBuilder.DropTable(
-                name: "Encuesta");
+                name: "Ciudades");
 
             migrationBuilder.DropTable(
-                name: "Ciudades");
+                name: "Encuesta");
         }
     }
 }

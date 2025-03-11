@@ -53,6 +53,12 @@ namespace Jendri_Hidalgo_P2_AP1.Migrations
                     b.Property<int>("CiudadId")
                         .HasColumnType("int");
 
+                    b.Property<int>("EncuestaId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -60,6 +66,8 @@ namespace Jendri_Hidalgo_P2_AP1.Migrations
                     b.HasKey("DetalleId");
 
                     b.HasIndex("CiudadId");
+
+                    b.HasIndex("EncuestaId");
 
                     b.ToTable("CiudadesDetalle");
                 });
@@ -91,11 +99,22 @@ namespace Jendri_Hidalgo_P2_AP1.Migrations
                         .HasForeignKey("CiudadId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Jendri_Hidalgo_P2_AP1.Models.Encuesta", null)
+                        .WithMany("Detalles")
+                        .HasForeignKey("EncuestaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Jendri_Hidalgo_P2_AP1.Models.Ciudades", b =>
                 {
                     b.Navigation("CiudadesDetalle");
+                });
+
+            modelBuilder.Entity("Jendri_Hidalgo_P2_AP1.Models.Encuesta", b =>
+                {
+                    b.Navigation("Detalles");
                 });
 #pragma warning restore 612, 618
         }
