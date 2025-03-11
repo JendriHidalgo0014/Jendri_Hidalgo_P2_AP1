@@ -3,15 +3,17 @@
 @using Jendri_Hidalgo_P2_AP1.Services
 @inject EncuestaService encuestaService
 @inject NavigationManager navigation
+
 @rendermode InteractiveServer
 
-<PageTitle>Prestamos</PageTitle>
+<PageTitle>Encuestas</PageTitle>
+
 <div class="container">
     <div class="card shadow-lg">
         <div class="card-header bg-warning text-dark">
-            <h3 class="bi bi-person-fill"><strong> Registro de prestamos</strong></h3>
+            <h3 class="bi bi-person-fill"><strong> Registro de Encuestas</strong></h3>
         </div>
-        <div class="row text-left">
+        <div class="row text-left p-3">
             <div class="col-md-3">
                 <label for="filtro" class="form-label"><strong>Filtrar por:</strong></label>
                 <InputSelect id="filtro" class="form-select" @bind-Value="filtro">
@@ -21,59 +23,88 @@
                 </InputSelect>
             </div>
             <div class="col-md-6">
-                <label for="valorFiltro" class="form-label"><strong>B&uacute;squeda:</strong></label>
+                <label for="valorFiltro" class="form-label"><strong>Búsqueda:</strong></label>
                 <div class="input-group">
                     <InputText id="valorFiltro" @bind-Value="valorFiltro" class="form-control" placeholder="Buscar" />
                     <button @onclick="Buscar" class="btn btn-warning bi bi-search" type="button"> Buscar</button>
                 </div>
             </div>
-
-
             <div class="col-md-3 d-flex align-items-center justify-content-end">
-                <a href="/Prestamos/Create" class="btn btn-warning btn-sm d-flex align-items-center px-3 py-2">
+                <a href="/Encuesta/Create" class="btn btn-warning btn-sm d-flex align-items-center px-3 py-2">
                     <i class="bi bi-plus-square-fill me-1"></i> Crear
                 </a>
             </div>
-
-
             <div class="col-1">
-                <button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise"
-                        @onclick="Restablecer">
-                </button>
+                <button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise" @onclick="Restablecer"></button>
             </div>
-
-
-            <div class="card-body">
-                <table class="table table-light">
-                    <thead class="table table-striped text-center table-bordered mt-3 bg-dark text-white">
+        </div>
+        <div class="card-body">
+            <table class="table table-light">
+                <thead class="table table-striped text-center table-bordered mt-3 bg-dark text-white">
+                    <tr>
+                        <th>ID</th>
+                        <th>Asignatura</th>
+                        <th>Fecha</th>
+                        <th>Modificar</th>
+                        <th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var encuesta in Encuestas)
+                    {
                         <tr>
-                            <th>ID</th>
-                            <th>Asignatura</th>
-                            <th>CantidadCoutas</th>
-                            <th>Fecha</th>
-                            <th>Eliminar</th>
-
+                            <td class="text-center">@encuesta.EncuestaId</td>
+                            <td class="text-center">@encuesta.Asignatura</td>
+                            <td class="text-center">@encuesta.Fecha.ToShortDateString()</td>
+                            <td class="text-center">
+                                <a href="/Encuesta/Edit/@encuesta.EncuestaId" class="btn btn-secondary text-white bi bi-pencil-fill"></a>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-danger bi bi-trash2-fill" @onclick="() => Eliminar(encuesta.EncuestaId)"></button>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var Encuesta in Encuesta)
-                        {
-                            <tr>
-                                <td class="text-center">@Encuesta.EncuestaId</td>
-                                <td class="text-center">@Encuesta.Asignatura</td>
-                                <td class="text-center">@Encuesta.Fecha</td>
-
-                                <td class="text-center">
-                                    <a href="/Encuesta/Edit/@Encuesta.EncuestaId" class="btn btn-secondary text-white bi bi-pencil-fill"></a>
-                                </td>
-                                <td class="text-center">
-                                    <a href="/Encuesta/Delete/@Encuesta.EncuestaId" class="btn btn-danger bi bi-trash2-fill"></a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+
+@code {
+    private List<Encuesta> Encuestas = new();
+    private string filtro = "id";
+    private string valorFiltro = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Encuestas = await encuestaService.Listar(t => true);
+    }
+
+    private async Task Buscar()
+    {
+        if (string.IsNullOrWhiteSpace(valorFiltro))
+        {
+            Encuestas = await encuestaService.Listar(t => true);
+            return;
+        }
+
+        Encuestas = await encuestaService.Listar(e =>
+            (filtro == "id" && e.EncuestaId.ToString().Contains(valorFiltro)) ||
+            (filtro == "Asignatura" && e.Asignatura.Contains(valorFiltro, StringComparison.OrdinalIgnoreCase)) ||
+            (filtro == "Fecha" && e.Fecha.ToShortDateString().Contains(valorFiltro)));
+    }
+
+    private async Task Restablecer()
+    {
+        valorFiltro = "";
+        Encuestas = await encuestaService.Listar(t => true);
+    }
+
+    private async Task Eliminar(int id)
+    {
+        if (await encuestaService.Eliminar(id))
+        {
+            Encuestas = await encuestaService.Listar(t => true);
+        }
+    }
+}

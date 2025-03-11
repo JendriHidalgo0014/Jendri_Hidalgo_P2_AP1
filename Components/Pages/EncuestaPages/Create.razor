@@ -1,9 +1,8 @@
 ﻿@page "/Encuesta/Create"
-@using Jendri_Hidalgo_P2_AP1.Models
-@using Jendri_Hidalgo_P2_AP1.Services
 @inject EncuestaService encuestaService
 @inject CiudadesDetalleService ciudadesDetalleService
 @inject CiudadesService ciudadesService
+@inject Context dbContext
 @inject NavigationManager navigation
 @rendermode InteractiveServer
 
@@ -18,11 +17,18 @@
             <div class="card-header text-center bg-danger text-white">
                 <h4>Registrar nueva encuesta</h4>
             </div>
-
             <div class="card-body">
-                <label for="EncuestaId"><strong>ID de Encuesta</strong></label>
+                <label for="EncuestaId"><strong>ID</strong></label>
                 <InputNumber id="EncuestaId" class="form-control" @bind-Value="encuesta.EncuestaId" readonly />
                 <ValidationMessage For="@(() => encuesta.EncuestaId)" />
+
+                <label for="Asignatura"><strong>Asignatura</strong></label>
+                <InputText id="Asignatura" class="form-control" @bind-Value="encuesta.Asignatura" />
+                <ValidationMessage For="@(() => encuesta.Asignatura)" />
+
+                <label for="Fecha"><strong>Fecha</strong></label>
+                <InputDate id="Fecha" class="form-control" @bind-Value="encuesta.Fecha" />
+                <ValidationMessage For="@(() => encuesta.Fecha)" />
             </div>
         </div>
 
@@ -48,13 +54,14 @@
                         {
                             <tr>
                                 <td>
-                                    <InputSelect class="form-control" @bind-Value="detalle.CiudadId">
+                                    <InputSelect @bind-Value="selectedCiudadId" class="form-select">
                                         <option value="">Seleccione...</option>
-                                        @foreach (var ciudad in ciudades)
+                                        @foreach (var ciudades in ciudades)
                                         {
                                             <option value="@ciudad.CiudadId">@ciudad.Nombre</option>
                                         }
                                     </InputSelect>
+
                                 </td>
                                 <td>
                                     <InputNumber class="form-control" @bind-Value="detalle.Monto" @oninput="CalcularTotal" />
@@ -86,15 +93,18 @@
     public List<Ciudades> ciudades = new List<Ciudades>();
     public decimal TotalMonto => detalles.Sum(d => d.Monto);
     private Ciudades? ciudad;
-    private List<Ciudades> listaCiudades = new();
+    public List<Ciudades> listaCiudades = new List<Ciudades>();
+    private int selectedCiudadId;
 
     [Inject] private CiudadesService CiudadesService { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        listaCiudades = await CiudadesService.Listar(c => c.Nombre.StartsWith("S"));
+        listaCiudades = await dbContext.Ciudades.ToListAsync(); 
 
-        ciudad = await CiudadesService.ObtenerCiudad(c => c.Nombre == "Santo Domingo");
+        ciudad = await CiudadesService.ObtenerCiudad(c => true);
+
+        ciudades = await CiudadesService.Listar(c => true);
 
         if (ciudad != null)
         {
