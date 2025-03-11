@@ -1,0 +1,134 @@
+﻿@page "/Encuesta/Create"
+@using Jendri_Hidalgo_P2_AP1.Models
+@using Jendri_Hidalgo_P2_AP1.Services
+@inject EncuestaService encuestaService
+@inject CiudadesDetalleService ciudadesDetalleService
+@inject CiudadesService ciudadesService
+@inject NavigationManager navigation
+@rendermode InteractiveServer
+
+<PageTitle>Agregar Encuesta</PageTitle>
+
+<EditForm Model="encuesta" OnValidSubmit="GuardarEncuesta">
+    <DataAnnotationsValidator />
+	<ValidationSummary />
+
+    <div class="container card shadow-lg">
+        <div class="card shadow">
+            <div class="card-header text-center bg-danger text-white">
+                <h4>Registrar nueva encuesta</h4>
+            </div>
+
+            <div class="card-body">
+                <label for="EncuestaId"><strong>ID de Encuesta</strong></label>
+                <InputNumber id="EncuestaId" class="form-control" @bind-Value="encuesta.EncuestaId" readonly />
+                <ValidationMessage For="@(() => encuesta.EncuestaId)" />
+            </div>
+        </div>
+
+        <!-- Tabla de Detalles -->
+        <div class="card shadow mt-3 border-success">
+            <div class="card-header bg-white text-dark">
+                <h5>Detalles de Ciudades</h5>
+                <div class="mt-3">
+                    <button type="button" class="btn btn-primary" @onclick="AgregarDetalle">Agregar Ciudad</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped text-center table-bordered">
+                    <thead class="bg-dark text-white">
+                        <tr>
+                            <th>Ciudad</th>
+                            <th>Monto</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var detalle in detalles)
+                        {
+                            <tr>
+                                <td>
+                                    <InputSelect class="form-control" @bind-Value="detalle.CiudadId">
+                                        <option value="">Seleccione...</option>
+                                        @foreach (var ciudad in ciudades)
+                                        {
+                                            <option value="@ciudad.CiudadId">@ciudad.Nombre</option>
+                                        }
+                                    </InputSelect>
+                                </td>
+                                <td>
+                                    <InputNumber class="form-control" @bind-Value="detalle.Monto" @oninput="CalcularTotal" />
+
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" @onclick="() => EliminarDetalle(detalle)">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <h5 class="text-right">Total: @TotalMonto.ToString("C")</h5>
+            </div>
+        </div>
+
+        <div class="card-footer text-center mt-3">
+            <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Registrar</button>
+            <a href="/Encuesta/Index" class="btn btn-danger"><i class="bi bi-arrow-left"></i> Volver</a>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    public Encuesta encuesta = new Encuesta();
+    public List<CiudadesDetalle> detalles = new List<CiudadesDetalle>();
+    public List<Ciudades> ciudades = new List<Ciudades>();
+    public decimal TotalMonto => detalles.Sum(d => d.Monto);
+    private Ciudades? ciudad;
+    private List<Ciudades> listaCiudades = new();
+
+    [Inject] private CiudadesService CiudadesService { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        listaCiudades = await CiudadesService.Listar(c => c.Nombre.StartsWith("S"));
+
+        ciudad = await CiudadesService.ObtenerCiudad(c => c.Nombre == "Santo Domingo");
+
+        if (ciudad != null)
+        {
+            Console.WriteLine($"ID de la ciudad: {ciudad.CiudadId}");
+        }
+    }
+
+    private void AgregarDetalle()
+    {
+        detalles.Add(new CiudadesDetalle());
+    }
+
+    private void EliminarDetalle(CiudadesDetalle detalle)
+    {
+        detalles.Remove(detalle);
+    }
+
+    private void CalcularTotal(ChangeEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    private async Task GuardarEncuesta()
+    {
+        if (!detalles.Any() || detalles.Any(d => d.CiudadId == 0 || d.Monto <= 0))
+        {
+            return;
+        }
+
+        encuesta.Detalles = detalles;
+        var resultado = await encuestaService.Guardar(encuesta);
+        if (resultado)
+        {
+            navigation.NavigateTo("/Encuesta/Index");
+        }
+    }
+}

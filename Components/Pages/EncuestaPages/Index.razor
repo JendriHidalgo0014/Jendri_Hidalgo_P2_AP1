@@ -1,0 +1,79 @@
+﻿@page "/Encuesta/Index"
+@using Jendri_Hidalgo_P2_AP1.Models
+@using Jendri_Hidalgo_P2_AP1.Services
+@inject EncuestaService encuestaService
+@inject NavigationManager navigation
+@rendermode InteractiveServer
+
+<PageTitle>Prestamos</PageTitle>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header bg-warning text-dark">
+            <h3 class="bi bi-person-fill"><strong> Registro de prestamos</strong></h3>
+        </div>
+        <div class="row text-left">
+            <div class="col-md-3">
+                <label for="filtro" class="form-label"><strong>Filtrar por:</strong></label>
+                <InputSelect id="filtro" class="form-select" @bind-Value="filtro">
+                    <option value="id">ID</option>
+                    <option value="Asignatura">Asignatura</option>
+                    <option value="Fecha">Fecha</option>
+                </InputSelect>
+            </div>
+            <div class="col-md-6">
+                <label for="valorFiltro" class="form-label"><strong>B&uacute;squeda:</strong></label>
+                <div class="input-group">
+                    <InputText id="valorFiltro" @bind-Value="valorFiltro" class="form-control" placeholder="Buscar" />
+                    <button @onclick="Buscar" class="btn btn-warning bi bi-search" type="button"> Buscar</button>
+                </div>
+            </div>
+
+
+            <div class="col-md-3 d-flex align-items-center justify-content-end">
+                <a href="/Prestamos/Create" class="btn btn-warning btn-sm d-flex align-items-center px-3 py-2">
+                    <i class="bi bi-plus-square-fill me-1"></i> Crear
+                </a>
+            </div>
+
+
+            <div class="col-1">
+                <button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise"
+                        @onclick="Restablecer">
+                </button>
+            </div>
+
+
+            <div class="card-body">
+                <table class="table table-light">
+                    <thead class="table table-striped text-center table-bordered mt-3 bg-dark text-white">
+                        <tr>
+                            <th>ID</th>
+                            <th>Asignatura</th>
+                            <th>CantidadCoutas</th>
+                            <th>Fecha</th>
+                            <th>Eliminar</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var Encuesta in Encuesta)
+                        {
+                            <tr>
+                                <td class="text-center">@Encuesta.EncuestaId</td>
+                                <td class="text-center">@Encuesta.Asignatura</td>
+                                <td class="text-center">@Encuesta.Fecha</td>
+
+                                <td class="text-center">
+                                    <a href="/Encuesta/Edit/@Encuesta.EncuestaId" class="btn btn-secondary text-white bi bi-pencil-fill"></a>
+                                </td>
+                                <td class="text-center">
+                                    <a href="/Encuesta/Delete/@Encuesta.EncuestaId" class="btn btn-danger bi bi-trash2-fill"></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
